@@ -4,6 +4,10 @@
 @author: Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 # 2/8/95  changed D3 to 150.05mm which is closer to data from Lee, AKB86 and
 # Tarn fixed errors in COG for links 2 and 3
 # 29/1/91 to agree with data from Armstrong etal.  Due to their use
@@ -12,15 +16,13 @@
 # 14/2/91 to use Paul's value of link twist (alpha) to be consistant
 #  with ARCL.  This is the -ve of Lee's values, which means the
 #  zero angle position is a righty for Paul, and lefty for Lee.
-
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
-
 # from math import pi
 import numpy as np
-from roboticstoolbox import DHRobot, RevoluteDH, IKSolution, angle_axis
+from spatialmath import SE3, base
+
+from roboticstoolbox import DHRobot, IKSolution, RevoluteDH, angle_axis
 from roboticstoolbox.tools.types import NDArray
-from spatialmath import SE3
-from spatialmath import base
 
 
 class Puma560(DHRobot):
@@ -71,9 +73,9 @@ class Puma560(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym
@@ -271,7 +273,7 @@ class Puma560(DHRobot):
 
         config = self.config_validate(config, ("lr", "ud", "nf"))
 
-        def ik3(robot, T, config="lun"):
+        def ik3(robot: Any, T: Any, config: str = "lun") -> Any:
 
             # solve for the first three joints
 
@@ -428,7 +430,7 @@ class Puma560(DHRobot):
 if __name__ == "__main__":  # pragma nocover
     puma = Puma560(symbolic=False)
     print(puma)
-    print(puma.dynamics())
+    print(puma.dynamics())  # type: ignore[func-returns-value]
     # T = puma.fkine(puma.qn)
     # print(puma.ikine_a(T, 'lu').q)
     # print(puma.ikine_a(T, 'ru').q)

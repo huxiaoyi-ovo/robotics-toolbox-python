@@ -11,12 +11,14 @@ http://www.robots.ox.ac.uk/~pnewman
 
 from collections import namedtuple
 
+import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
+import spatialmath.base as smb
 from matplotlib import animation
 
-import spatialmath.base as smb
+from roboticstoolbox.mobile.workspace import resolve_workspace
 
 """
 Monte-carlo based localisation for estimating vehicle pose based on
@@ -134,12 +136,12 @@ class ParticleFilter:
         self._keep_history = history  #  keep history
         self._htuple = namedtuple("PFlog", "t odo xest std weights")
 
-        if workspace is not None:
-            self._dim = smb.expand_dims(workspace)
-        else:
-            self._dim = sensor.map.workspace
-
-        self._workspace = self.robot.workspace
+        # the workspace, in order of precedence: the explicit argument, the
+        # sensor's map, the vehicle
+        self._workspace = resolve_workspace(
+            workspace, sensor.map if sensor is not None else None, self.robot
+        )
+        self._dim = self._workspace
         # self._init()
 
     def __str__(self):
@@ -682,8 +684,10 @@ class ParticleFilter:
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         Plot the estimated vehicle path in the xy-plane.
 
@@ -691,8 +695,7 @@ class ParticleFilter:
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
 
 if __name__ == "__main__":

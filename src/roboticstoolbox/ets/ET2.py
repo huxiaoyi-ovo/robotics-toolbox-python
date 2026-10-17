@@ -4,25 +4,33 @@
 @author: Jesse Haviland
 """
 
-import roboticstoolbox as rtb
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from numpy import array, ndarray
-from spatialmath.base import trot2, transl2
+
 # Aliased: the bottom of this module rebinds the bare name `SE2` to the
 # ET2.SE2 classmethod (the free-function alias), so the spatialmath class
 # needs its own name here.
 from spatialmath import SE2 as SE2T
+from spatialmath.base import transl2, trot2
 
+import roboticstoolbox as rtb
 from roboticstoolbox.ets._ET import BaseET, Sym, _resolve_param
+
+if TYPE_CHECKING:  # pragma: nocover
+    from roboticstoolbox.ets.ETS2 import ETS2
 
 
 class ET2(BaseET):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    def __mul__(self, other: "ET2") -> "rtb.ETS2":
-        return rtb.ETS2([self, other])
+    def __mul__(self, other: ET2) -> ETS2:
+        return rtb.ETS2([self, other])  # type: ignore[operator]
 
-    def __add__(self, other: "ET2") -> "rtb.ETS2":
+    def __add__(self, other: ET2) -> ETS2:
         return self.__mul__(other)
 
     @property
@@ -43,12 +51,12 @@ class ET2(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET2":
+        **kwargs: Any,
+    ) -> ET2:
         """
         Pure rotation
 
-        :param param: rotation angle
+        :param param: rotation angle, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -82,12 +90,12 @@ class ET2(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET2":
+        **kwargs: Any,
+    ) -> ET2:
         """
         Pure translation along the x-axis
 
-        :param param: translation distance along the x-axis
+        :param param: translation distance along the x-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -115,12 +123,12 @@ class ET2(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET2":
+        **kwargs: Any,
+    ) -> ET2:
         """
         Pure translation along the y-axis
 
-        :param param: translation distance along the y-axis
+        :param param: translation distance along the y-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -141,7 +149,7 @@ class ET2(BaseET):
         return cls(axis="ty", param=param, axis_func=lambda y: transl2(0, y), **kwargs)
 
     @classmethod
-    def SE2(cls, T: ndarray | SE2T, **kwargs) -> "ET2":
+    def SE2(cls, T: ndarray | SE2T, **kwargs: Any) -> ET2:
         """
         A static SE2
 
